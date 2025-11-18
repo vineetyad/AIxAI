@@ -34,7 +34,7 @@ export const Header: React.FC = () => {
               <span className="text-2xl font-bold tracking-tight text-white leading-none">
                 AI<span className="text-primary">X</span>AI
               </span>
-              <span className="text-[0.55rem] font-medium text-primary/80 tracking-[0.25em] uppercase ml-0.5">
+              <span className="text-[0.65rem] font-bold text-primary tracking-[0.2em] uppercase ml-0.5">
                 AI Agency India
               </span>
             </div>

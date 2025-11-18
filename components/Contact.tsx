@@ -1,6 +1,65 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export const Contact: React.FC = () => {
+  const [errors, setErrors] = useState<{name?: string, email?: string, message?: string}>({});
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    const name = (formData.get('name') as string || '').trim();
+    const email = (formData.get('email') as string || '').trim();
+    const message = (formData.get('message') as string || '').trim();
+
+    const newErrors: {name?: string, email?: string, message?: string} = {};
+
+    // Validate Name
+    if (!name) {
+      newErrors.name = 'Name is required.';
+    } else if (name.length < 2) {
+      newErrors.name = 'Name must be at least 2 characters.';
+    }
+
+    // Validate Email
+    // Stricter regex for email validation:
+    // 1. Alphanumeric + symbols before @
+    // 2. Domain name
+    // 3. TLD must be at least 2 characters
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+    if (!email) {
+      newErrors.email = 'Email is required.';
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = 'Please enter a valid email address (e.g., name@company.com).';
+    }
+
+    // Validate Message
+    if (!message) {
+      newErrors.message = 'Message is required.';
+    } else if (message.length < 10) {
+      newErrors.message = 'Message must be at least 10 characters.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Clear errors if validation passes
+    setErrors({});
+
+    const subject = `New Inquiry from ${name}`;
+    const body = `Name: ${name}
+Email: ${email}
+
+Message:
+${message}`;
+
+    const mailtoLink = `mailto:hq@aixai.co.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
   return (
     <section id="contact" className="w-full flex flex-col items-center text-center">
       <div className="max-w-2xl mb-10">
@@ -16,7 +75,7 @@ export const Contact: React.FC = () => {
         {/* Glow effect behind form */}
         <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-2xl blur opacity-20" />
         
-        <form className="relative w-full rounded-2xl bg-black/50 border border-white/10 backdrop-blur-xl p-8 space-y-6 text-left shadow-2xl">
+        <form onSubmit={handleSubmit} className="relative w-full rounded-2xl bg-black/50 border border-white/10 backdrop-blur-xl p-8 space-y-6 text-left shadow-2xl">
           <div>
             <label htmlFor="name" className="sr-only">Name</label>
             <input 
@@ -24,9 +83,17 @@ export const Contact: React.FC = () => {
               id="name"
               name="name"
               placeholder="Name"
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all"
+              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all ${
+                errors.name 
+                  ? 'border-red-500/50 focus:border-red-500' 
+                  : 'border-white/10 focus:border-primary/50'
+              }`}
             />
+            {errors.name && (
+              <p className="mt-2 text-xs text-red-400 font-medium ml-1">{errors.name}</p>
+            )}
           </div>
+          
           <div>
             <label htmlFor="email" className="sr-only">Company Email</label>
             <input 
@@ -34,9 +101,17 @@ export const Contact: React.FC = () => {
               id="email"
               name="email"
               placeholder="Company Email"
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all"
+              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all ${
+                errors.email 
+                  ? 'border-red-500/50 focus:border-red-500' 
+                  : 'border-white/10 focus:border-primary/50'
+              }`}
             />
+            {errors.email && (
+              <p className="mt-2 text-xs text-red-400 font-medium ml-1">{errors.email}</p>
+            )}
           </div>
+          
           <div>
             <label htmlFor="message" className="sr-only">Message</label>
             <textarea 
@@ -44,8 +119,15 @@ export const Contact: React.FC = () => {
               name="message"
               rows={4}
               placeholder="How can we help?"
-              className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all resize-none"
+              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all resize-none ${
+                errors.message 
+                  ? 'border-red-500/50 focus:border-red-500' 
+                  : 'border-white/10 focus:border-primary/50'
+              }`}
             />
+            {errors.message && (
+              <p className="mt-2 text-xs text-red-400 font-medium ml-1">{errors.message}</p>
+            )}
           </div>
           
           <button 
