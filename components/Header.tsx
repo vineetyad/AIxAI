@@ -32,7 +32,7 @@ export const Header: React.FC = () => {
             </div>
             <div className="flex flex-col justify-center">
               <span className="text-2xl font-bold tracking-tight text-white leading-none">
-                AI<span className="text-primary">X</span>AI
+                AI<span className="text-primary">x</span>AI
               </span>
               <span className="text-[0.65rem] font-bold text-primary tracking-[0.2em] uppercase ml-0.5">
                 AI Agency India
