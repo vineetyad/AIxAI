@@ -12,7 +12,7 @@ export const Hero: React.FC = () => {
       </div>
 
       {/* Main Headline */}
-      <h1 className="max-w-7xl text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 sm:text-4xl md:text-7xl lg:text-8xl mb-6 drop-shadow-2xl">
+      <h1 className="max-w-5xl text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 sm:text-4xl md:text-7xl lg:text-8xl mb-6 drop-shadow-2xl">
         Transform Your Business with Artificial Intelligence
       </h1>
 
