@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 
 export const Contact: React.FC = () => {
   const [errors, setErrors] = useState<{name?: string, email?: string, message?: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -48,16 +49,30 @@ export const Contact: React.FC = () => {
 
     // Clear errors if validation passes
     setErrors({});
+    setIsSubmitting(true);
 
-    const subject = `New Inquiry from ${name}`;
-    const body = `Name: ${name}
-Email: ${email}
+    // Append Web3Forms Access Key
+    formData.append("access_key", "f7762166-f677-4553-88d3-218edb56f940");
 
-Message:
-${message}`;
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
 
-    const mailtoLink = `mailto:hq@aixai.co.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoLink;
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Success! Your message has been sent.");
+        form.reset();
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -76,6 +91,9 @@ ${message}`;
         <div className="absolute -inset-1 bg-gradient-to-r from-primary to-purple-600 rounded-2xl blur opacity-20" />
         
         <form onSubmit={handleSubmit} className="relative w-full rounded-2xl bg-black/50 border border-white/10 backdrop-blur-xl p-8 space-y-6 text-left shadow-2xl">
+          {/* Honeypot to prevent spam (optional but good practice with web3forms) */}
+          <input type="checkbox" name="botcheck" className="hidden" style={{ display: 'none' }} />
+
           <div>
             <label htmlFor="name" className="sr-only">Name</label>
             <input 
@@ -83,7 +101,8 @@ ${message}`;
               id="name"
               name="name"
               placeholder="Name"
-              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all ${
+              disabled={isSubmitting}
+              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.name 
                   ? 'border-red-500/50 focus:border-red-500' 
                   : 'border-white/10 focus:border-primary/50'
@@ -101,7 +120,8 @@ ${message}`;
               id="email"
               name="email"
               placeholder="Company Email"
-              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all ${
+              disabled={isSubmitting}
+              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.email 
                   ? 'border-red-500/50 focus:border-red-500' 
                   : 'border-white/10 focus:border-primary/50'
@@ -119,7 +139,8 @@ ${message}`;
               name="message"
               rows={4}
               placeholder="How can we help?"
-              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all resize-none ${
+              disabled={isSubmitting}
+              className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.message 
                   ? 'border-red-500/50 focus:border-red-500' 
                   : 'border-white/10 focus:border-primary/50'
@@ -132,9 +153,14 @@ ${message}`;
           
           <button 
             type="submit"
-            className="w-full py-4 rounded-xl bg-primary text-black font-bold text-lg tracking-wide hover:shadow-[0_0_30px_-5px_rgba(0,240,255,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            disabled={isSubmitting}
+            className={`w-full py-4 rounded-xl bg-primary text-black font-bold text-lg tracking-wide transition-all ${
+              isSubmitting 
+                ? 'opacity-70 cursor-not-allowed' 
+                : 'hover:shadow-[0_0_30px_-5px_rgba(0,240,255,0.5)] hover:scale-[1.02] active:scale-[0.98]'
+            }`}
           >
-            Submit Inquiry
+            {isSubmitting ? "Sending..." : "Submit Inquiry"}
           </button>
         </form>
       </div>

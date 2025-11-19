@@ -9,6 +9,7 @@ import { Stats } from './components/Stats';
 import { Work } from './components/Work';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
+import { ChatWidget } from './components/ChatWidget';
 
 const App: React.FC = () => {
   return (
@@ -34,6 +35,9 @@ const App: React.FC = () => {
 
         <Footer />
       </div>
+
+      {/* AI Chat Widget */}
+      <ChatWidget />
     </div>
   );
 };
