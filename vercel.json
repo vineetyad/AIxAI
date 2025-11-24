@@ -1,0 +1,5 @@
+{
+  "redirects": [
+    { "source": "/quantum", "destination": "/?page=quantum", "permanent": true }
+  ]
+}
