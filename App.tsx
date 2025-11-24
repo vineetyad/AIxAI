@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Background } from './components/Background';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -11,13 +11,24 @@ import { Work } from './components/Work';
 import { Contact } from './components/Contact';
 import { Footer } from './components/Footer';
 import { ChatWidget } from './components/ChatWidget';
+import { QuantumCanvas } from './components/QuantumCanvas';
 
 const App: React.FC = () => {
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
+  const [isQuantumCanvas, setIsQuantumCanvas] = useState(false);
+
+  useEffect(() => {
+    // Check if the current path is /Quantumcanvasstudio
+    // In a real router this would be cleaner, but for this setup:
+    if (window.location.pathname === '/Quantumcanvasstudio') {
+      setIsQuantumCanvas(true);
+    }
+  }, []);
 
   const handleServiceClick = (service: ServiceItem) => {
     // Special handling for AI Film Making to open in a new tab
     if (service.id === 'film') {
+      // Open in new tab as requested previously
       window.open('/Quantumcanvasstudio', '_blank');
       return;
     }
@@ -30,6 +41,11 @@ const App: React.FC = () => {
     setSelectedService(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Render specific landing page if route matches
+  if (isQuantumCanvas) {
+    return <QuantumCanvas />;
+  }
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-black text-white selection:bg-primary selection:text-black">
