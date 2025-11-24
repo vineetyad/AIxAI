@@ -29,7 +29,7 @@ const App: React.FC = () => {
     // Special handling for AI Film Making to open in a new tab
     if (service.id === 'film') {
       // Open in new tab using query parameter
-      window.open('?page=quantum', '_blank');
+      window.open('quantumcanvasstudios', '_blank');
       return;
     }
 
