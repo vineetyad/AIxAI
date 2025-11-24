@@ -16,6 +16,12 @@ const App: React.FC = () => {
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
 
   const handleServiceClick = (service: ServiceItem) => {
+    // Special handling for AI Film Making to open in a new tab
+    if (service.id === 'film') {
+      window.open('/Quantumcanvasstudio', '_blank');
+      return;
+    }
+
     setSelectedService(service);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
