@@ -18,9 +18,9 @@ const App: React.FC = () => {
   const [isQuantumCanvas, setIsQuantumCanvas] = useState(false);
 
   useEffect(() => {
-    // Check if the current path is /Quantumcanvasstudio
-    // In a real router this would be cleaner, but for this setup:
-    if (window.location.pathname === '/Quantumcanvasstudio') {
+    // Check for query parameter instead of pathname to avoid 404s on static hosts
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('page') === 'quantum') {
       setIsQuantumCanvas(true);
     }
   }, []);
@@ -28,8 +28,8 @@ const App: React.FC = () => {
   const handleServiceClick = (service: ServiceItem) => {
     // Special handling for AI Film Making to open in a new tab
     if (service.id === 'film') {
-      // Open in new tab as requested previously
-      window.open('/Quantumcanvasstudio', '_blank');
+      // Open in new tab using query parameter
+      window.open('?page=quantum', '_blank');
       return;
     }
 

@@ -8,7 +8,7 @@ export const QuantumCanvas: React.FC = () => {
       {/* Navbar */}
       <nav className="w-full px-6 py-8 flex justify-between items-center max-w-[1400px] mx-auto">
         <div className="flex gap-4 bg-white px-2 py-2 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.03)] items-center">
-            <a href="#" className="px-6 py-2 bg-[#F2F4F8] rounded-full text-sm font-bold text-[#8B5CF6]">Home</a>
+            <a href="/" className="px-6 py-2 bg-[#F2F4F8] rounded-full text-sm font-bold text-[#8B5CF6]">Home</a>
             <a href="#work" className="px-6 py-2 text-sm font-medium text-gray-500 hover:text-[#8B5CF6] transition-colors">Work</a>
             <a href="#about" className="px-6 py-2 text-sm font-medium text-gray-500 hover:text-[#8B5CF6] transition-colors">About</a>
         </div>
