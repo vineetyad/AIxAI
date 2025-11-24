@@ -1,5 +1,15 @@
 {
+  "rewrites": [
+    {
+      "source": "/quantumcanvasstudios",
+      "destination": "/index.html"
+    }
+  ],
   "redirects": [
-    { "source": "/quantumcanvasstudios", "destination": "/?page=quantum", "permanent": true }
+    {
+      "source": "/quantumcanvasstudios",
+      "destination": "/?page=quantumcanvasstudios",
+      "permanent": false
+    }
   ]
 }
