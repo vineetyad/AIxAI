@@ -1,9 +1,82 @@
 import React, { useState } from 'react';
-import { Play, ArrowRight, Mail, Instagram, Linkedin, Twitter, Clapperboard, Sparkles, Cpu, Home, Target, Zap, Users } from 'lucide-react';
+import { Play, ArrowRight, Mail, Instagram, Linkedin, Twitter, Clapperboard, Sparkles, Cpu, Home, Target, Zap, Users, X } from 'lucide-react';
 import { Background } from './Background';
 
 export const QuantumCanvas: React.FC = () => {
   const [view, setView] = useState<'home' | 'about'>('home');
+  const [isContactOpen, setIsContactOpen] = useState(false);
+  const [errors, setErrors] = useState<{name?: string, email?: string, message?: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    
+    const name = (formData.get('name') as string || '').trim();
+    const email = (formData.get('email') as string || '').trim();
+    const message = (formData.get('message') as string || '').trim();
+
+    const newErrors: {name?: string, email?: string, message?: string} = {};
+
+    // Validate Name
+    if (!name) {
+      newErrors.name = 'Name is required.';
+    } else if (name.length < 2) {
+      newErrors.name = 'Name must be at least 2 characters.';
+    }
+
+    // Validate Email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+    if (!email) {
+      newErrors.email = 'Email is required.';
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = 'Please enter a valid email address (e.g., name@company.com).';
+    }
+
+    // Validate Message
+    if (!message) {
+      newErrors.message = 'Message is required.';
+    } else if (message.length < 10) {
+      newErrors.message = 'Message must be at least 10 characters.';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Clear errors if validation passes
+    setErrors({});
+    setIsSubmitting(true);
+
+    // Append Web3Forms Access Key
+    formData.append("access_key", "f7762166-f677-4553-88d3-218edb56f940");
+    // Add context to know it came from Quantum Canvas
+    formData.append("source", "Quantum Canvas Studio");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Success! Your message has been sent.");
+        form.reset();
+        setIsContactOpen(false);
+      } else {
+        alert("Error: " + data.message);
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-black text-white font-sans selection:bg-primary selection:text-black overflow-x-hidden pb-10 relative">
@@ -117,9 +190,12 @@ export const QuantumCanvas: React.FC = () => {
                     <p className="text-gray-400 text-sm">Reach me directly, let's make magic.</p>
                 </div>
                 
-                <a href="mailto:HQ@aixai.co.in" className="mt-8 w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all">
+                <button 
+                  onClick={() => setIsContactOpen(true)}
+                  className="mt-8 w-full py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-bold text-sm flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-black group-hover:border-primary transition-all"
+                >
                     CONNECT <Mail className="w-4 h-4" />
-                </a>
+                </button>
             </div>
 
             {/* Showreel / Image Card */}
@@ -212,9 +288,12 @@ export const QuantumCanvas: React.FC = () => {
                         
                         <div className="mt-12 pt-12 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
                             <p className="text-sm text-gray-500">Ready to redefine your visual narrative?</p>
-                            <a href="mailto:HQ@aixai.co.in" className="px-8 py-4 rounded-full bg-primary text-black font-bold hover:scale-105 transition-transform flex items-center gap-2">
+                            <button 
+                                onClick={() => setIsContactOpen(true)}
+                                className="px-8 py-4 rounded-full bg-primary text-black font-bold hover:scale-105 transition-transform flex items-center gap-2"
+                            >
                                 Start a Project <ArrowRight className="w-4 h-4" />
-                            </a>
+                            </button>
                         </div>
                     </div>
 
@@ -229,6 +308,75 @@ export const QuantumCanvas: React.FC = () => {
           <p>© 2024 Quantum Canvas Studio. A Division of AIxAI.</p>
         </footer>
       </div>
+
+      {/* Contact Modal */}
+      {isContactOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in-up">
+            <div className="relative w-full max-w-lg bg-[#0a0a0a] border border-white/10 rounded-3xl p-8 shadow-2xl">
+                <button 
+                    onClick={() => setIsContactOpen(false)} 
+                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-white/5 rounded-full hover:bg-white/10 transition-colors"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+
+                <h2 className="text-2xl font-bold text-white mb-6">Start a Project</h2>
+                
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <input type="checkbox" name="botcheck" className="hidden" style={{ display: 'none' }} />
+                    
+                    <div>
+                        <input 
+                        type="text" 
+                        name="name"
+                        placeholder="Name"
+                        disabled={isSubmitting}
+                        className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all ${
+                            errors.name ? 'border-red-500/50' : 'border-white/10 focus:border-primary/50'
+                        }`}
+                        />
+                        {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
+                    </div>
+
+                    <div>
+                        <input 
+                        type="email" 
+                        name="email"
+                        placeholder="Email"
+                        disabled={isSubmitting}
+                        className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all ${
+                            errors.email ? 'border-red-500/50' : 'border-white/10 focus:border-primary/50'
+                        }`}
+                        />
+                        {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+                    </div>
+
+                    <div>
+                        <textarea 
+                        name="message"
+                        rows={4}
+                        placeholder="Tell us about your project..."
+                        disabled={isSubmitting}
+                        className={`w-full px-5 py-4 bg-white/5 border rounded-xl text-white placeholder:text-gray-500 focus:outline-none focus:bg-white/10 transition-all resize-none ${
+                            errors.message ? 'border-red-500/50' : 'border-white/10 focus:border-primary/50'
+                        }`}
+                        />
+                        {errors.message && <p className="mt-1 text-xs text-red-400">{errors.message}</p>}
+                    </div>
+
+                    <button 
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`w-full py-4 rounded-xl bg-primary text-black font-bold text-lg tracking-wide transition-all ${
+                        isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:shadow-[0_0_20px_-5px_rgba(0,240,255,0.5)] hover:scale-[1.02]'
+                        }`}
+                    >
+                        {isSubmitting ? "Sending..." : "Submit Inquiry"}
+                    </button>
+                </form>
+            </div>
+        </div>
+      )}
     </div>
   );
 };
