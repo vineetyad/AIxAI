@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { BrainCircuit } from 'lucide-react';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onHomeClick?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onHomeClick }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -11,6 +15,18 @@ export const Header: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    if (onHomeClick) {
+      // If we are on a details page, we want to go back to home first
+      onHomeClick();
+      // We might need to delay the scroll slightly if the home page is re-rendering
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
 
   return (
     <header 
@@ -25,20 +41,27 @@ export const Header: React.FC = () => {
           }`}
         >
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <button 
+            onClick={() => onHomeClick && onHomeClick()}
+            className="flex items-center gap-3 focus:outline-none"
+          >
             <div className="relative flex items-center justify-center w-10 h-10 text-primary">
               <BrainCircuit className="w-full h-full fill-primary/10 stroke-primary" strokeWidth={1.5} />
               <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-50" />
             </div>
-            <div className="flex flex-col justify-center">
-              <span className="text-2xl font-bold tracking-tight text-white leading-none">
-                AI<span className="text-primary">x</span>AI
-              </span>
-              <span className="text-[0.65rem] font-bold text-primary tracking-[0.2em] uppercase ml-0.5">
-                AI Agency India
-              </span>
+            
+            <div className="flex items-center gap-3">
+                 <img src="https://i.ibb.co/3ykG88w/Designer-1.png" alt="AIxAI Logo Icon" className="h-8 w-auto object-contain" />
+                <div className="flex flex-col justify-center">
+                <span className="text-2xl font-bold tracking-tight text-white leading-none">
+                    AI<span className="text-primary">X</span>AI
+                </span>
+                <span className="text-[0.65rem] font-bold text-primary tracking-[0.2em] uppercase ml-0.5">
+                    AI Agency India
+                </span>
+                </div>
             </div>
-          </div>
+          </button>
 
           {/* Nav - Desktop */}
           <nav className="hidden md:flex items-center gap-1">
@@ -46,6 +69,7 @@ export const Header: React.FC = () => {
               <a 
                 key={item}
                 href={`#${item.toLowerCase()}`}
+                onClick={(e) => handleNavClick(e, item.toLowerCase())}
                 className="px-4 py-2 text-sm font-medium text-gray-300 transition-all rounded-full hover:text-white hover:bg-white/10 hover:scale-105"
               >
                 {item}
