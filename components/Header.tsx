@@ -46,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({ onHomeClick }) => {
             className="flex items-center gap-3 focus:outline-none"
           >
             <div className="flex items-center gap-3">
-                 <img src="https://i.ibb.co/3ykG88w/Designer-1.png" alt="AIxAI Logo Icon" className="h-8 w-auto object-contain" />
+                 <img src="https://drive.google.com/file/d/14dZNx0LaxEDsa7qVC5hSea3-XPekU6U_/view" alt="AIxAI Logo Icon" className="h-8 w-auto object-contain" />
                 <div className="flex flex-col justify-center">
                 <span className="text-2xl font-bold tracking-tight text-white leading-none">
                     AI<span className="text-primary">X</span>AI
