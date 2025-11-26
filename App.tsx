@@ -3,7 +3,7 @@ import { Background } from './components/Background';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { Features } from './components/Features';
-import { Services, ServiceItem } from './components/Services';
+import { Services, ServiceItem, servicesData } from './components/Services';
 import { ServiceDetails } from './components/ServiceDetails';
 import { Process } from './components/Process';
 import { Stats } from './components/Stats';
@@ -17,12 +17,38 @@ const App: React.FC = () => {
   const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
   const [isQuantumCanvas, setIsQuantumCanvas] = useState(false);
 
-  useEffect(() => {
-    // Check for query parameter instead of pathname to avoid 404s on static hosts
+  // Handle URL changes (popstate and initial load)
+  const handleUrlChange = () => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('page') === 'quantum') {
+    const page = params.get('page');
+    const id = params.get('id');
+
+    if (page === 'quantum') {
       setIsQuantumCanvas(true);
+      setSelectedService(null);
+    } else if (page === 'service' && id) {
+      const service = servicesData.find(s => s.id === id);
+      if (service) {
+        setSelectedService(service);
+        setIsQuantumCanvas(false);
+      } else {
+        // Service ID not found, default to home
+        setSelectedService(null);
+        setIsQuantumCanvas(false);
+      }
+    } else {
+      setIsQuantumCanvas(false);
+      setSelectedService(null);
     }
+  };
+
+  useEffect(() => {
+    // Check URL on mount
+    handleUrlChange();
+
+    // Listen for back/forward navigation
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
   }, []);
 
   const handleServiceClick = (service: ServiceItem) => {
@@ -33,11 +59,22 @@ const App: React.FC = () => {
       return;
     }
 
+    // Update URL using History API without reloading
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', 'service');
+    url.searchParams.set('id', service.id);
+    window.history.pushState({}, '', url.toString());
+
     setSelectedService(service);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleGoHome = () => {
+    // Reset URL to root
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.pushState({}, '', url.toString());
+
     setSelectedService(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
