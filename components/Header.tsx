@@ -45,8 +45,13 @@ export const Header: React.FC<HeaderProps> = ({ onHomeClick }) => {
             onClick={() => onHomeClick && onHomeClick()}
             className="flex items-center gap-3 focus:outline-none"
           >
+            <div className="relative flex items-center justify-center w-10 h-10 text-primary">
+              <BrainCircuit className="w-full h-full fill-primary/10 stroke-primary" strokeWidth={1.5} />
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-50" />
+            </div>
+            
             <div className="flex items-center gap-3">
-                 <img src="/" alt="AIxAI Logo Icon" className="h-12 w-auto object-contain" />
+                 <img src="https://i.ibb.co/3ykG88w/Designer-1.png" alt="AIxAI Logo Icon" className="h-8 w-auto object-contain" />
                 <div className="flex flex-col justify-center">
                 <span className="text-2xl font-bold tracking-tight text-white leading-none">
                     AI<span className="text-primary">X</span>AI
