@@ -539,6 +539,11 @@ h3 {
   text-align: center;
   padding: 1.5rem;
   border-radius: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px; /* Ensure uniform height for centering */
 }
 
 .stat-number {
@@ -1085,6 +1090,18 @@ h3 {
     gap: 2rem;
   }
 
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 400px;
+    margin: 2.5rem auto 0;
+  }
+
+  .stat-item {
+    padding: 1.25rem;
+    min-height: 100px;
+  }
+
   .process-steps {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
@@ -1134,7 +1151,7 @@ h3 {
   }
 }
 
-/* --- Custom Cursor --- */
+/* --- Custom Cursor (Desktop Only) --- */
 @media (pointer: fine) {
   body {
     cursor: none;

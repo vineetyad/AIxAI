@@ -1,13 +1,15 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { CustomCursor } from './components/CustomCursor';
 import { Header } from './components/Header';
 import { Home } from './components/Home';
 import { ServiceDetail } from './components/ServiceDetail';
+import { ScrollToTop } from './components/ScrollToTop';
+import { CustomCursor } from './components/CustomCursor';
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <CustomCursor />
       <Header />
       <Routes>
