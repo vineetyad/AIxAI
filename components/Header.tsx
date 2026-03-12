@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { LiquidGlass } from './LiquidGlass';
 
 export const Header: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleScrollTarget = (e: React.MouseEvent<HTMLAnchorElement>, targetIndex: number) => {
         e.preventDefault();
+        setIsMenuOpen(false); // Close mobile menu on click
 
-        // If we are already on the home page, just scroll the cylinder
         if (location.pathname === '/') {
             window.dispatchEvent(new CustomEvent('scrollToCylinderIndex', { detail: { index: targetIndex } }));
         } else {
-            // If we are on a detail page, navigate home, then wait a beat for CardStack to mount and scroll
             navigate('/');
             setTimeout(() => {
                 window.dispatchEvent(new CustomEvent('scrollToCylinderIndex', { detail: { index: targetIndex } }));
@@ -23,20 +24,23 @@ export const Header: React.FC = () => {
 
     return (
         <header className="site-header">
-            <LiquidGlass className="header-glass">
+            <LiquidGlass className={`header-glass ${isMenuOpen ? 'menu-open' : ''}`}>
                 <div className="header-container">
                     <Link to="/" className="header-logo" onClick={(e) => handleScrollTarget(e, 0)}>
-                        <svg className="logo-icon" viewBox="0 0 2048 1143" style={{ height: 60, width: 'auto', display: 'block', transform: 'translateY(-4px)', marginRight: '-15px' }} preserveAspectRatio="xMidYMid meet" fill="rgb(40,44,48)">
+                        <svg className="logo-icon" viewBox="0 0 2048 1143" preserveAspectRatio="xMidYMid meet" fill="rgb(40,44,48)">
                             <path d="M 625.497 207.751 C 656.651 207.201 689.19 207.712 720.431 207.891 C 750.377 234.363 784.353 270.972 813.133 299.322 L 1044.9 530.413 L 1107.18 592.771 C 1118.12 603.671 1130.64 616.924 1142.14 626.776 C 1175.85 606.816 1209.76 587.179 1243.85 567.869 C 1261.29 557.912 1285.32 545.139 1301.54 534.521 C 1318.08 533.783 1337.64 534.234 1354.36 534.218 C 1380.57 534.074 1406.79 534.125 1433 534.37 C 1402.99 549.651 1362 574.948 1332.31 592.057 C 1284.22 619.19 1236.35 646.716 1188.7 674.633 C 1231.06 715.904 1272.16 758.729 1314.57 799.985 C 1324.34 809.494 1336.37 820.771 1344.85 831.252 C 1344.11 807.727 1344.61 781.937 1344.61 758.281 L 1344.65 628.25 C 1368.43 612.981 1393.92 600.693 1418.03 585.141 C 1419.48 622.239 1418.3 668.437 1418.28 706.122 L 1418.27 935.308 L 1345.96 935.303 C 1326.52 917.407 1305.72 894.387 1286.36 875.504 C 1231.78 822.271 1178.34 764.726 1123.43 712.041 C 1076.99 739.355 1030.36 766.351 983.545 793.028 C 921.996 827.505 861.172 864.294 799.527 898.851 C 780.742 909.382 755.291 926.548 735.54 934.505 C 731.78 936.02 704.33 935.483 698.603 935.463 L 629.435 935.26 C 628.748 908.77 629.405 879.485 629.404 852.758 L 629.344 690.584 L 629.26 235.789 C 653.111 260.375 679.876 286.56 702.745 311.52 L 703.266 881.283 C 811.869 819.763 919.085 754.789 1027.79 693.318 C 1044.25 684.007 1060.78 674.429 1076.95 664.637 C 1069.18 657.936 1058.98 647.256 1051.36 639.7 L 1000.03 588.105 L 865.339 452.914 C 805.822 393.984 746.837 334.519 688.391 274.526 C 676.726 262.515 632.812 219.056 625.497 207.751 z" />
                         </svg>
                         <span className="logo-text">AIxAI</span>
                     </Link>
-                    <nav className="header-nav">
-                        {/* 0 = Hero, 1 = About, 2 = Services Part 1 */}
+
+                    <button className="mobile-menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+
+                    <nav className={`header-nav ${isMenuOpen ? 'open' : ''}`}>
                         <a href="/" className="nav-link" onClick={(e) => handleScrollTarget(e, 0)}>Home</a>
                         <a href="/#services" className="nav-link" onClick={(e) => handleScrollTarget(e, 2)}>Services</a>
-                        <a href="/#blogs" className="nav-link">Blogs</a>
-                        {/* 6 = Contact Us (Hero, About, Services1, Services2, Process, Work, Contact) */}
+                        <a href="/#blogs" className="nav-link" onClick={() => setIsMenuOpen(false)}>Blogs</a>
                         <a href="/#contact" className="nav-link" onClick={(e) => handleScrollTarget(e, 6)}>Contact us</a>
                     </nav>
                 </div>

@@ -13,12 +13,19 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
     const isAnimating = useRef(false);
     const currentIndex = useRef(0);
 
+    const [isMobile, setIsMobile] = useState(() => 
+        typeof window !== 'undefined' ? window.innerWidth <= 800 : false
+    );
+
     // Cylinder geometry — 30° steps for smooth circular motion
     const stepAngle = 30;
     const cylinderRadius = 1800;
     const scrollPerCard = 1000; // px per section in scroll height
 
-    const totalScrollHeight = scrollPerCard * numCards + window.innerHeight;
+    // Calculated scroll height (only matters for desktop)
+    const totalScrollHeight = typeof window !== 'undefined' 
+        ? (scrollPerCard * numCards + window.innerHeight)
+        : 5000;
 
     // Smooth ease-in-out for circular rolling feel
     const easeInOut = (t: number) => t < 0.5
@@ -62,55 +69,56 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
     }, [scrollPerCard]);
 
     useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 800);
+        };
+        // Initial check
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    useEffect(() => {
         const container = containerRef.current;
-        if (!container) return;
+        if (!container && !isMobile) return;
 
         let lastScrollTime = 0;
         let scrollAccumulator = 0;
         let lastScrollDirection = 0;
-        let wheelActive = false; // Locks the wheel until a physical pause is detected
+        let wheelActive = false; 
 
         const onWheel = (e: WheelEvent) => {
+            if (isMobile) return; // Let native scrolling handle mobile
             e.preventDefault();
             const now = performance.now();
             
             const timeSinceLastEvent = now - lastScrollTime;
             lastScrollTime = now;
 
-            // If there is a pause > 100ms, the user has physically stopped scrolling/swiping
             if (timeSinceLastEvent > 100) {
                 scrollAccumulator = 0;
-                wheelActive = true; // Unlock for the new swipe
+                wheelActive = true; 
             }
 
-            // If we've already triggered a transition for this swipe, 
-            // ignore the rest of the trackpad inertia stream completely.
             if (!wheelActive || isAnimating.current) {
                 return;
             }
 
             const currentDirection = Math.sign(e.deltaY);
-            
-            // If direction changed sharply mid-swipe, reset accumulator
             if (currentDirection !== lastScrollDirection && currentDirection !== 0) {
                 scrollAccumulator = 0;
                 lastScrollDirection = currentDirection;
             }
 
             scrollAccumulator += e.deltaY;
-
-            // Strict threshold to filter out tiny touches
             const THRESHOLD = 120;
 
             if (Math.abs(scrollAccumulator) >= THRESHOLD) {
                 const direction = scrollAccumulator > 0 ? 1 : -1;
-                
                 const nextIdx = Math.max(0, Math.min(numCards - 1, currentIndex.current + direction));
                 
                 if (nextIdx !== currentIndex.current) {
                     transitionCard(nextIdx);
-                    // CRITICAL: Lock the wheel. No more transitions can happen until 
-                    // the current inertia completely stops (timeSinceLastEvent > 100ms).
                     wheelActive = false; 
                 }
                 
@@ -119,7 +127,7 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
         };
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (isAnimating.current) return;
+            if (isMobile || isAnimating.current) return;
 
             let direction = 0;
             if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
@@ -146,19 +154,21 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
             }
         };
 
-        // Touch support for mobile
+        // Touch support for mobile (only if strictly on desktop 3D view but using touch, e.g. tablets)
         let touchStartY = 0;
         const onTouchStart = (e: TouchEvent) => {
+            if (isMobile) return;
             touchStartY = e.touches[0].clientY;
         };
         const onTouchEnd = (e: TouchEvent) => {
+            if (isMobile) return;
             const now = performance.now();
-            if (isAnimating.current || now - lastScrollTime < cooldown) return;
+            if (isAnimating.current || now - lastScrollTime < 1000) return;
 
             const touchEndY = e.changedTouches[0].clientY;
             const diff = touchStartY - touchEndY;
 
-            if (Math.abs(diff) < 40) return; // Ignore small swipes
+            if (Math.abs(diff) < 40) return; 
 
             lastScrollTime = now;
             const direction = diff > 0 ? 1 : -1;
@@ -171,15 +181,22 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
             const customEvent = e as CustomEvent<{ index: number }>;
             if (customEvent.detail && typeof customEvent.detail.index === 'number') {
                 const targetIdx = Math.max(0, Math.min(numCards - 1, customEvent.detail.index));
-                transitionCard(targetIdx);
+                if (window.innerWidth <= 800) {
+                    // Mobile: scroll natively to the section ID
+                    document.getElementById(`mobile-section-${targetIdx}`)?.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // Desktop: 3D rotate to it
+                    transitionCard(targetIdx);
+                }
             }
         };
 
-        // passive: false is required so e.preventDefault() works to block native scrolling
-        window.addEventListener('wheel', onWheel, { passive: false });
-        window.addEventListener('keydown', onKeyDown);
-        window.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchend', onTouchEnd);
+        if (!isMobile) {
+            window.addEventListener('wheel', onWheel, { passive: false });
+            window.addEventListener('keydown', onKeyDown);
+            window.addEventListener('touchstart', onTouchStart, { passive: true });
+            window.addEventListener('touchend', onTouchEnd);
+        }
         window.addEventListener('scrollToCylinderIndex', onCustomScroll);
 
         return () => {
@@ -189,7 +206,21 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
             window.removeEventListener('touchend', onTouchEnd);
             window.removeEventListener('scrollToCylinderIndex', onCustomScroll);
         };
-    }, [numCards, transitionCard]);
+    }, [numCards, transitionCard, isMobile]);
+
+    if (isMobile) {
+        return (
+            <div className="mobile-stack">
+                {cards.map((child, index) => (
+                    <section key={index} id={`mobile-section-${index}`} className="mobile-section">
+                        <div className="cylinder-card-inner">
+                            {child}
+                        </div>
+                    </section>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div
