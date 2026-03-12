@@ -112,6 +112,26 @@ export const servicesData: ServiceDetail[] = [
         ]
     },
     {
+        slug: 'specialized-ai-services',
+        icon: '✨',
+        shortTitle: 'Specialized AI Services',
+        shortDescription: 'Bespoke AI model fine-tuning, edge deployment, and white-label AI products.',
+        longTitle: 'Specialized AI Services: Custom-Built Intelligence',
+        longDescription: 'Every organization has unique challenges that off-the-shelf solutions cannot address. Our Specialized AI Services offer bespoke AI model fine-tuning, edge deployment for latency-critical applications, and white-label AI product development. We work hand-in-hand with your team to build proprietary AI capabilities that become a lasting competitive moat.',
+        benefits: [
+            'Build proprietary AI assets tailored to your exact domain',
+            'Deploy AI at the edge for ultra-low latency and privacy',
+            'Launch white-label AI products under your own brand'
+        ],
+        useCases: [
+            'Custom large language model fine-tuning on proprietary data',
+            'Edge AI for IoT, retail kiosks, and autonomous systems',
+            'White-label AI chatbot and analytics platforms',
+            'Domain-specific computer vision model development',
+            'AI-powered internal decision support systems'
+        ]
+    },
+    {
         slug: 'ai-for-sales-and-marketing',
         icon: '🎯',
         shortTitle: 'AI for Sales & Marketing',

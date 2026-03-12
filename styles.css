@@ -468,10 +468,55 @@ h3 {
 
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* Use a 6-column underlying grid to map 3-card and 2-card rows perfectly */
+  grid-template-columns: repeat(6, 1fr);
   gap: 1.5rem;
   position: relative;
   z-index: 1;
+  width: 100%;
+}
+
+/* Default: every card spans 2 columns (3 cards per row) */
+.services-grid > * {
+  grid-column: span 2;
+}
+
+/* If there are exactly 5 cards:
+   - First 3 cards stay span 2 (Row 1)
+   - Last 2 cards become span 3 (Row 2, split 50/50 exactly centered) */
+.services-grid > *:first-child:nth-last-child(5) ~ *:nth-child(4),
+.services-grid > *:first-child:nth-last-child(5) ~ *:nth-child(5) {
+  grid-column: span 3;
+}
+
+/* Tablet: Switch to a 4-column underlying grid for 2-card rows */
+@media (max-width: 1024px) {
+  .services-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  /* Reset default to span 2 (2 cards per row) */
+  .services-grid > * {
+    grid-column: span 2;
+  }
+  
+  /* If 5 cards: 
+     - Cards 1-4 span 2 (Rows 1 & 2)
+     - Card 5 spans 4 (Row 3, full width centered)
+     OR we let it be handled generally. Let's make the last odd card full width on tablet */
+  .services-grid > *:last-child:nth-child(odd) {
+    grid-column: span 4;
+  }
+}
+
+/* Mobile: Single column */
+@media (max-width: 600px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+  .services-grid > * {
+    grid-column: span 1 !important;
+  }
 }
 
 .service-card {

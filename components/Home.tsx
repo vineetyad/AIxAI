@@ -9,8 +9,8 @@ import { ContactCard } from './ContactCard';
 import { servicesData } from '../src/data/services';
 
 export const Home: React.FC = () => {
-    const servicesPart1 = servicesData.slice(0, 5);
-    const servicesPart2 = servicesData.slice(5, 10);
+    const servicesPart1 = servicesData.slice(0, 6);
+    const servicesPart2 = servicesData.slice(6, 11);
 
     return (
         <CardStack>
