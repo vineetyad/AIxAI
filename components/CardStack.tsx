@@ -66,22 +66,56 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
         if (!container) return;
 
         let lastScrollTime = 0;
-        const cooldown = 500; // ms to wait before accepting next wheel swipe (snappier)
+        let scrollAccumulator = 0;
+        let lastScrollDirection = 0;
+        let wheelActive = false; // Locks the wheel until a physical pause is detected
 
         const onWheel = (e: WheelEvent) => {
             e.preventDefault();
-
             const now = performance.now();
-            if (isAnimating.current || now - lastScrollTime < cooldown) return;
-
-            // Require a stronger, deliberate scroll (filters out tiny momentum trails)
-            if (Math.abs(e.deltaY) < 40) return;
-
+            
+            const timeSinceLastEvent = now - lastScrollTime;
             lastScrollTime = now;
 
-            const direction = e.deltaY > 0 ? 1 : -1;
-            const nextIdx = Math.max(0, Math.min(numCards - 1, currentIndex.current + direction));
-            transitionCard(nextIdx);
+            // If there is a pause > 100ms, the user has physically stopped scrolling/swiping
+            if (timeSinceLastEvent > 100) {
+                scrollAccumulator = 0;
+                wheelActive = true; // Unlock for the new swipe
+            }
+
+            // If we've already triggered a transition for this swipe, 
+            // ignore the rest of the trackpad inertia stream completely.
+            if (!wheelActive || isAnimating.current) {
+                return;
+            }
+
+            const currentDirection = Math.sign(e.deltaY);
+            
+            // If direction changed sharply mid-swipe, reset accumulator
+            if (currentDirection !== lastScrollDirection && currentDirection !== 0) {
+                scrollAccumulator = 0;
+                lastScrollDirection = currentDirection;
+            }
+
+            scrollAccumulator += e.deltaY;
+
+            // Strict threshold to filter out tiny touches
+            const THRESHOLD = 120;
+
+            if (Math.abs(scrollAccumulator) >= THRESHOLD) {
+                const direction = scrollAccumulator > 0 ? 1 : -1;
+                
+                const nextIdx = Math.max(0, Math.min(numCards - 1, currentIndex.current + direction));
+                
+                if (nextIdx !== currentIndex.current) {
+                    transitionCard(nextIdx);
+                    // CRITICAL: Lock the wheel. No more transitions can happen until 
+                    // the current inertia completely stops (timeSinceLastEvent > 100ms).
+                    wheelActive = false; 
+                }
+                
+                scrollAccumulator = 0;
+            }
         };
 
         const onKeyDown = (e: KeyboardEvent) => {
