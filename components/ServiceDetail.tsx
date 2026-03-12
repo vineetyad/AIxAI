@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { servicesData } from '../src/data/services';
 import './ServiceDetail.css';
@@ -9,6 +9,16 @@ export const ServiceDetail: React.FC = () => {
 
     // Find the matching service from our data array
     const service = servicesData.find(s => s.slug === id);
+
+    const navigate = useNavigate();
+
+    const handleContactClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        navigate('/');
+        setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('scrollToCylinderIndex', { detail: { index: 6 } }));
+        }, 100);
+    };
 
     if (!service) {
         return (
@@ -64,7 +74,7 @@ export const ServiceDetail: React.FC = () => {
                 <footer className="service-cta">
                     <h2>Ready to Transform Your Business?</h2>
                     <p>Book a consultation with our AI strategists to discuss how {service.shortTitle} can accelerate your growth.</p>
-                    <a href="mailto:contact@aixai.com" className="cta-button glass-card">Contact Us</a>
+                    <button onClick={handleContactClick} className="cta-button glass-card" style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: '1rem' }}>Contact Us</button>
                 </footer>
             </main>
         </div>
