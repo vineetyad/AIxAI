@@ -464,12 +464,14 @@ h3 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .service-card {
   padding: 2rem;
   border-radius: 1.5rem;
-  cursor: default;
+  cursor: pointer;
 }
 
 .service-card:hover {
