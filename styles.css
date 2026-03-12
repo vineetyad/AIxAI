@@ -226,6 +226,12 @@ h3 {
   z-index: 0;
 }
 
+/* Ensure all card content sits above the gradient mesh */
+.cylinder-card-inner > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Each section gets a vivid gradient mesh */
 .cylinder-card:nth-child(1) .cylinder-card-inner::before {
   background:
