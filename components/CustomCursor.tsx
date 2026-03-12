@@ -5,7 +5,13 @@ export const CustomCursor: React.FC = () => {
     const [isHovering, setIsHovering] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
 
+    const [isMobile, setIsMobile] = useState(() => 
+        typeof window !== 'undefined' ? (window.innerWidth <= 800 || window.matchMedia("(pointer: coarse)").matches) : false
+    );
+
     useEffect(() => {
+        if (isMobile) return;
+
         const updatePosition = (e: MouseEvent) => {
             setPosition({ x: e.clientX, y: e.clientY });
             if (!isVisible) setIsVisible(true);
@@ -39,7 +45,7 @@ export const CustomCursor: React.FC = () => {
         };
     }, [isVisible]);
 
-    if (!isVisible) return null;
+    if (isMobile || !isVisible) return null;
 
     return (
         <div
