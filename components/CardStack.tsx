@@ -6,282 +6,102 @@ interface CardStackProps {
 
 export const CardStack: React.FC<CardStackProps> = ({ children }) => {
     const cards = React.Children.toArray(children);
-    const numCards = cards.length;
-    const containerRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
-    const [animatedRotation, setAnimatedRotation] = useState(0); // Tracks current rotation degree
-    const isAnimating = useRef(false);
-    const currentIndex = useRef(0);
+    const activeIndexRef = useRef(0);
 
-    const [isMobile, setIsMobile] = useState(() => 
-        typeof window !== 'undefined' ? window.innerWidth <= 800 : false
-    );
+    useEffect(() => {
+        let ticking = false;
 
-    // Cylinder geometry — 30° steps for smooth circular motion
-    const stepAngle = 30;
-    const cylinderRadius = 1800;
-    const scrollPerCard = 1000; // px per section in scroll height
+        const updateVisuals = () => {
+            const viewportHalf = window.innerHeight / 2;
+            const sections = document.querySelectorAll('.scroll-section-inner');
+            
+            let newActiveIndex = activeIndexRef.current;
 
-    // Calculated scroll height (only matters for desktop)
-    const totalScrollHeight = typeof window !== 'undefined' 
-        ? (scrollPerCard * numCards + window.innerHeight)
-        : 5000;
+            sections.forEach((section, index) => {
+                const rect = section.getBoundingClientRect();
+                const sectionCenter = rect.top + rect.height / 2;
+                const distFromCenter = sectionCenter - viewportHalf;
+                
+                // Maps the distance to a curve: content scrolls away and tilts back.
+                // This gives the exact illusion of a cylinder surface rolling underneath.
+                // -45 ensures the rotation follows the natural swipe direction.
+                const rotateX = (distFromCenter / window.innerHeight) * -45; 
+                const scale = Math.max(0.75, 1 - Math.abs(distFromCenter / window.innerHeight) * 0.2);
+                const opacity = Math.max(0.1, 1 - Math.abs(distFromCenter / window.innerHeight) * 0.8);
+                
+                const el = section as HTMLElement;
+                el.style.transform = `perspective(1200px) rotateX(${rotateX}deg) scale(${scale})`;
+                el.style.opacity = opacity.toFixed(3);
+                
+                // Active section is whichever is closest to center
+                if (Math.abs(distFromCenter) < viewportHalf * 0.5) {
+                    newActiveIndex = index;
+                }
+            });
 
-    // Smooth ease-in-out for circular rolling feel
-    const easeInOut = (t: number) => t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            if (newActiveIndex !== activeIndexRef.current) {
+                activeIndexRef.current = newActiveIndex;
+                setActiveIndex(newActiveIndex);
+            }
+            
+            ticking = false;
+        };
 
-    // Helper to transition cards
-    const transitionCard = useCallback((nextIdx: number) => {
-        if (nextIdx === currentIndex.current || isAnimating.current) return;
-
-        const startRotation = currentIndex.current * stepAngle;
-        const targetRotation = nextIdx * stepAngle;
-        const startTime = performance.now();
-        const duration = 400; // ms (fast, 120hz feel)
-
-        currentIndex.current = nextIdx;
-        setActiveIndex(nextIdx);
-        // Sync scroll position
-        window.scrollTo({ top: nextIdx * scrollPerCard, behavior: 'auto' });
-
-        isAnimating.current = true;
-
-        const animate = (now: number) => {
-            const elapsed = now - startTime;
-            const t = Math.min(elapsed / duration, 1);
-            const eased = easeInOut(t);
-            const rotation = startRotation + (targetRotation - startRotation) * eased;
-
-            setAnimatedRotation(rotation);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                setTimeout(() => {
-                    isAnimating.current = false;
-                }, 100);
+        const onScroll = () => {
+            if (!ticking) {
+                requestAnimationFrame(updateVisuals);
+                ticking = true;
             }
         };
 
-        requestAnimationFrame(animate);
-    }, [scrollPerCard]);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        
+        // Initial setup
+        updateVisuals();
 
-    useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth <= 800);
+        return () => {
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
         };
-        // Initial check
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const scrollToIdx = useCallback((idx: number) => {
+        const el = document.getElementById(`section-${idx}`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+        }
     }, []);
 
     useEffect(() => {
-        const container = containerRef.current;
-        if (!container && !isMobile) return;
-
-        let lastScrollTime = 0;
-        let scrollAccumulator = 0;
-        let lastScrollDirection = 0;
-        let wheelActive = false; 
-
-        const onWheel = (e: WheelEvent) => {
-            if (isMobile) return; // Let native scrolling handle mobile
-            e.preventDefault();
-            const now = performance.now();
-            
-            const timeSinceLastEvent = now - lastScrollTime;
-            lastScrollTime = now;
-
-            if (timeSinceLastEvent > 100) {
-                scrollAccumulator = 0;
-                wheelActive = true; 
-            }
-
-            if (!wheelActive || isAnimating.current) {
-                return;
-            }
-
-            const currentDirection = Math.sign(e.deltaY);
-            if (currentDirection !== lastScrollDirection && currentDirection !== 0) {
-                scrollAccumulator = 0;
-                lastScrollDirection = currentDirection;
-            }
-
-            scrollAccumulator += e.deltaY;
-            const THRESHOLD = 120;
-
-            if (Math.abs(scrollAccumulator) >= THRESHOLD) {
-                const direction = scrollAccumulator > 0 ? 1 : -1;
-                const nextIdx = Math.max(0, Math.min(numCards - 1, currentIndex.current + direction));
-                
-                if (nextIdx !== currentIndex.current) {
-                    transitionCard(nextIdx);
-                    wheelActive = false; 
-                }
-                
-                scrollAccumulator = 0;
-            }
-        };
-
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (isMobile || isAnimating.current) return;
-
-            let direction = 0;
-            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
-                direction = 1;
-                e.preventDefault();
-            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-                direction = -1;
-                e.preventDefault();
-            } else if (e.key === 'Home') {
-                e.preventDefault();
-                transitionCard(0);
-                return;
-            } else if (e.key === 'End') {
-                e.preventDefault();
-                transitionCard(numCards - 1);
-                return;
-            }
-
-            if (direction !== 0) {
-                const now = performance.now();
-                lastScrollTime = now;
-                const nextIdx = Math.max(0, Math.min(numCards - 1, currentIndex.current + direction));
-                transitionCard(nextIdx);
-            }
-        };
-
-        // Touch support for mobile (only if strictly on desktop 3D view but using touch, e.g. tablets)
-        let touchStartY = 0;
-        const onTouchStart = (e: TouchEvent) => {
-            if (isMobile) return;
-            touchStartY = e.touches[0].clientY;
-        };
-        const onTouchEnd = (e: TouchEvent) => {
-            if (isMobile) return;
-            const now = performance.now();
-            if (isAnimating.current || now - lastScrollTime < 1000) return;
-
-            const touchEndY = e.changedTouches[0].clientY;
-            const diff = touchStartY - touchEndY;
-
-            if (Math.abs(diff) < 40) return; 
-
-            lastScrollTime = now;
-            const direction = diff > 0 ? 1 : -1;
-            const nextIdx = Math.max(0, Math.min(numCards - 1, currentIndex.current + direction));
-            transitionCard(nextIdx);
-        };
-
-        // Custom event for programmatic navigation from Header
         const onCustomScroll = (e: Event) => {
             const customEvent = e as CustomEvent<{ index: number }>;
             if (customEvent.detail && typeof customEvent.detail.index === 'number') {
-                const targetIdx = Math.max(0, Math.min(numCards - 1, customEvent.detail.index));
-                if (window.innerWidth <= 800) {
-                    // Mobile: scroll natively to the section ID
-                    document.getElementById(`mobile-section-${targetIdx}`)?.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    // Desktop: 3D rotate to it
-                    transitionCard(targetIdx);
-                }
+                scrollToIdx(customEvent.detail.index);
             }
         };
 
-        if (!isMobile) {
-            window.addEventListener('wheel', onWheel, { passive: false });
-            window.addEventListener('keydown', onKeyDown);
-            window.addEventListener('touchstart', onTouchStart, { passive: true });
-            window.addEventListener('touchend', onTouchEnd);
-        }
         window.addEventListener('scrollToCylinderIndex', onCustomScroll);
-
-        return () => {
-            window.removeEventListener('wheel', onWheel);
-            window.removeEventListener('keydown', onKeyDown);
-            window.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchend', onTouchEnd);
-            window.removeEventListener('scrollToCylinderIndex', onCustomScroll);
-        };
-    }, [numCards, transitionCard, isMobile]);
-
-    if (isMobile) {
-        return (
-            <div className="mobile-stack">
-                {cards.map((child, index) => (
-                    <section key={index} id={`mobile-section-${index}`} className="mobile-section">
-                        <div className="cylinder-card-inner">
-                            {child}
-                        </div>
-                    </section>
-                ))}
-            </div>
-        );
-    }
+        return () => window.removeEventListener('scrollToCylinderIndex', onCustomScroll);
+    }, [scrollToIdx]);
 
     return (
-        <div
-            ref={containerRef}
-            className="cylinder-container"
-            style={{ height: `${totalScrollHeight}px` }}
-        >
-            <div className="cylinder-viewport">
-                <div
-                    className="cylinder-scene"
-                    style={{
-                        transform: `translateZ(-${cylinderRadius}px) rotateX(${animatedRotation}deg)`,
-                        willChange: 'transform'
-                    }}
-                >
-                    {cards.map((child, index) => {
-                        const cardAngle = -index * stepAngle;
-                        const effectiveAngle = cardAngle + animatedRotation;
-
-                        let norm = effectiveAngle % 360;
-                        if (norm > 180) norm -= 360;
-                        if (norm < -180) norm += 360;
-
-                        const absAngle = Math.abs(norm);
-                        const isFront = absAngle < 10;
-                        const isVisible = absAngle < 60;
-
-                        const opacity = isFront ? 1 : Math.max(0, 1 - ((absAngle - 10) / 35));
-                        const blur = isFront ? 0 : Math.min(8, (absAngle - 10) * 0.2);
-
-                        return (
-                            <div
-                                key={index}
-                                className="cylinder-card"
-                                style={{
-                                    transform: `rotateX(${cardAngle}deg) translateZ(${cylinderRadius}px)`,
-                                    opacity: Math.max(0.02, opacity),
-                                    visibility: isVisible ? 'visible' : 'hidden',
-                                    pointerEvents: isFront ? 'auto' : 'none',
-                                    filter: blur > 0 ? `blur(${blur}px)` : 'none',
-                                    boxShadow: isFront
-                                        ? '0 20px 60px rgba(27,42,74,0.15), 0 0 30px rgba(74,127,181,0.08)'
-                                        : `0 8px 24px rgba(27,42,74,${0.08 * opacity})`,
-                                    willChange: 'opacity, filter, transform'
-                                }}
-                            >
-                                <div className="cylinder-card-inner">
-                                    {child}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
+        <div className="scroll-container">
+            {cards.map((child, index) => (
+                <section key={index} id={`section-${index}`} className="scroll-section">
+                    <div className="scroll-section-inner">
+                        {child}
+                    </div>
+                </section>
+            ))}
 
             <div className="scroll-dots">
                 {cards.map((_, i) => (
                     <button
                         key={i}
                         className={`scroll-dot ${i === activeIndex ? 'active' : ''}`}
-                        onClick={() => transitionCard(i)}
+                        onClick={() => scrollToIdx(i)}
                         aria-label={`Go to section ${i + 1}`}
                     />
                 ))}

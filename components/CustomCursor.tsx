@@ -5,7 +5,7 @@ export const CustomCursor: React.FC = () => {
     const [isHovering, setIsHovering] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
 
-    const [isMobile, setIsMobile] = useState(() => 
+    const [isMobile, setIsMobile] = useState(() =>
         typeof window !== 'undefined' ? (window.innerWidth <= 800 || window.matchMedia("(pointer: coarse)").matches) : false
     );
 
