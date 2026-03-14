@@ -9,7 +9,22 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const activeIndexRef = useRef(0);
 
+    const [isMobile, setIsMobile] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth <= 800 : false
+    );
+
     useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 800);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
+        if (isMobile) return;
+
         let ticking = false;
 
         const updateVisuals = () => {
@@ -24,8 +39,6 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
                 const distFromCenter = sectionCenter - viewportHalf;
                 
                 // Maps the distance to a curve: content scrolls away and tilts back.
-                // This gives the exact illusion of a cylinder surface rolling underneath.
-                // -45 ensures the rotation follows the natural swipe direction.
                 const rotateX = (distFromCenter / window.innerHeight) * -45; 
                 const scale = Math.max(0.75, 1 - Math.abs(distFromCenter / window.innerHeight) * 0.2);
                 const opacity = Math.max(0.1, 1 - Math.abs(distFromCenter / window.innerHeight) * 0.8);
@@ -65,14 +78,18 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
             window.removeEventListener('scroll', onScroll);
             window.removeEventListener('resize', onScroll);
         };
-    }, []);
+    }, [isMobile]);
 
     const scrollToIdx = useCallback((idx: number) => {
-        const el = document.getElementById(`section-${idx}`);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
+        if (isMobile) {
+            document.getElementById(`mobile-section-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            const el = document.getElementById(`section-${idx}`);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
         }
-    }, []);
+    }, [isMobile]);
 
     useEffect(() => {
         const onCustomScroll = (e: Event) => {
@@ -85,6 +102,20 @@ export const CardStack: React.FC<CardStackProps> = ({ children }) => {
         window.addEventListener('scrollToCylinderIndex', onCustomScroll);
         return () => window.removeEventListener('scrollToCylinderIndex', onCustomScroll);
     }, [scrollToIdx]);
+
+    if (isMobile) {
+        return (
+            <div className="mobile-stack">
+                {cards.map((child, index) => (
+                    <section key={index} id={`mobile-section-${index}`} className="mobile-section">
+                        <div className="cylinder-card-inner">
+                            {child}
+                        </div>
+                    </section>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="scroll-container">
