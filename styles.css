@@ -1050,40 +1050,190 @@ h3 {
 }
 
 /* --- Responsive --- */
+
+/* ---- Tablet & Mobile (≤800px) ---- */
 @media (max-width: 800px) {
+
+  /* Hide desktop scroll indicator dots */
+  .scroll-dots {
+    display: none;
+  }
+
+  /* Tighter section padding */
+  .scroll-section-inner {
+    padding: 5rem 1.25rem 3rem;
+  }
+
+  /* --- Hero --- */
+  .hero h1 {
+    font-size: clamp(1.8rem, 7vw, 3rem);
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    margin-bottom: 2rem;
+  }
+
+  .hero-cta {
+    gap: 0.75rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.85rem 1.8rem;
+    font-size: 0.9rem;
+  }
+
+  .hero-badge {
+    font-size: 0.78rem;
+    padding: 0.4rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* --- About --- */
   .about-grid {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+
+  .about-text p {
+    font-size: 1rem;
+    line-height: 1.7;
   }
 
   .stats-row {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    max-width: 400px;
-    margin: 2.5rem auto 0;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
   }
 
   .stat-item {
-    padding: 1.25rem;
-    min-height: 100px;
+    padding: 1rem 0.5rem;
+    min-height: 80px;
   }
 
+  .stat-number {
+    font-size: 1.6rem;
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+  }
+
+  /* --- Services --- */
+  .services-header p {
+    font-size: 0.95rem;
+  }
+
+  .service-card {
+    padding: 1.5rem;
+  }
+
+  .service-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .service-card h3 {
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  }
+
+  .service-card p {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  /* --- Process --- */
   .process-steps {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .process-steps::before {
     display: none;
   }
 
-  .contact-wrapper {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
+  .process-step {
+    padding: 1.5rem 1rem;
   }
 
+  .step-number {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .process-step p {
+    font-size: 0.82rem;
+  }
+
+  /* --- Work --- */
+  .work-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .work-image {
+    height: 180px;
+  }
+
+  .work-info {
+    padding: 1.25rem;
+  }
+
+  .work-info h3 {
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+  }
+
+  .work-info p {
+    font-size: 0.85rem;
+  }
+
+  /* --- Contact --- */
+  .contact-wrapper {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .contact-info h2 {
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    margin-bottom: 1rem;
+  }
+
+  .contact-info p {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-form {
+    padding: 1.75rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .form-submit {
+    padding: 0.85rem;
+    font-size: 0.95rem;
+  }
+
+  /* --- Footer --- */
+  .footer {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    font-size: 0.8rem;
+  }
+
+  /* --- Card & glass radius --- */
   .card {
-    padding: 2.5rem 1.5rem;
+    padding: 2rem 1.25rem;
   }
 
   /* --- Mobile Stack View --- */
@@ -1092,11 +1242,12 @@ h3 {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-section {
     width: 100%;
-    min-height: 100vh;
+    min-height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1106,15 +1257,154 @@ h3 {
 
   .mobile-section .cylinder-card-inner {
     height: auto;
-    min-height: 100vh;
-    padding: 6rem 1.25rem 4rem;
-    /* Calibrated side padding for mobile */
+    min-height: auto;
+    padding: 5rem 1.25rem 3rem;
     transform: none !important;
     background-size: 150%;
   }
 
   .mobile-section:nth-child(odd) {
     background-color: var(--color-bg);
+  }
+
+  /* Reduce gradient mesh for mobile performance */
+  .scroll-section::before {
+    opacity: 0.6;
+  }
+
+  /* Reduce glass blur for mobile performance */
+  .glass {
+    backdrop-filter: blur(20px) saturate(150%) brightness(1.05);
+    -webkit-backdrop-filter: blur(20px) saturate(150%) brightness(1.05);
+  }
+
+  .glass-card {
+    backdrop-filter: blur(12px) saturate(160%) brightness(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(160%) brightness(1.05);
+  }
+
+  /* Disable hover transforms on touch devices */
+  .glass:hover {
+    transform: none;
+  }
+
+  .glass-card:hover {
+    transform: none;
+  }
+
+  .glass-card:hover::before,
+  .glass:hover::before {
+    opacity: 0;
+  }
+}
+
+/* ---- Small Phones (≤500px) ---- */
+@media (max-width: 500px) {
+
+  .scroll-section-inner {
+    padding: 4.5rem 1rem 2.5rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.5rem, 8vw, 2.2rem);
+  }
+
+  .hero p {
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .about-text p {
+    font-size: 0.9rem;
+  }
+
+  .stats-row {
+    gap: 0.5rem;
+  }
+
+  .stat-number {
+    font-size: 1.35rem;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+  }
+
+  .stat-item {
+    padding: 0.75rem 0.25rem;
+    min-height: 70px;
+  }
+
+  .process-steps {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .process-step {
+    padding: 1.25rem 1rem;
+    text-align: left;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .step-number {
+    margin: 0;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .process-step h3 {
+    margin-bottom: 0.25rem;
+  }
+
+  .process-step p {
+    font-size: 0.8rem;
+  }
+
+  .services-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .service-card {
+    padding: 1.25rem;
+  }
+
+  .work-image {
+    height: 150px;
+  }
+
+  .contact-info p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+
+  .contact-form {
+    padding: 1.25rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .mobile-section .cylinder-card-inner {
+    padding: 4.5rem 1rem 2.5rem;
   }
 }
 
